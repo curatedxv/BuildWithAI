@@ -1,9 +1,10 @@
 from google import genai
 import re
 import os
+from module1 import module1 as module1
 
-api_key = os.environ.get('YOUR_API_KEY')
-client = genai.Client(api_key = api_key)
+#api_key = os.environ.get('YOUR_API_KEY')
+client = genai.Client(api_key = 'AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
 
 def module2(topic):
 
@@ -41,4 +42,13 @@ def module2(topic):
     # 7. Keep only the first 2 links (in case more are found)
     result = links_found[:2]
     result = [s[:-3] if len(s) >= 3 else "" for s in result]
-    return result
+    print(result)
+    object1 = module1('AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
+    for i in result:
+        end = []
+        end.append(object1.summarize_text_with_gemini(i))
+    return end
+
+if __name__ == "__main__":
+    topic = "Machine Learning"
+    print(module2(topic))
