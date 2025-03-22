@@ -81,19 +81,3 @@ class module1:
 
 
 
-
-if __name__ == "__main__":
-    ## test 1
-    # extractor = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
-    # url = "https://www.bbc.com/news/articles/c33706jy774o"  # Example URL
-    # title, summary = extractor.whole_module(url)
-    # print(title)
-    # print(summary)
-
-    ## test 2 -- wrong url
-    extractor = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
-    url = "https://www.bbc.com/news/articles/c3dsadsdadadsadsa3706jy774o"  # Example URL
-    title, summary = extractor.whole_module(url)
-    print(title)
-    print(summary)
-
