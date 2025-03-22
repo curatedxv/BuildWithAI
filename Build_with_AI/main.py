@@ -1,13 +1,15 @@
-from module1 import get_summary_from_url
-from module2 import find_similar_articles
+from module1 import module1
+from module2 import module2
 from module3 import analyze_article_integrity
 
 def run_fake_news_checker(url: str):
     # Step 1: Get original article title & summary
-    original_title, original_summary = get_summary_from_url(url)
+    object1 = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
+    original_title, original_summary = object1.whole_module(url)
 
     # Step 2: Find similar articles and summarize them
-    similar_articles = find_similar_articles(original_title, original_summary)
+    similar_articles = module2(original_title)
+    print(similar_articles)
     (title2, summary2), (title3, summary3) = similar_articles
 
     # Step 3: Run integrity check
@@ -17,9 +19,10 @@ def run_fake_news_checker(url: str):
         (title3, summary3)
     )
 
+
     return verdict
 
 # Test run
 if __name__ == "__main__":
-    test_url = "https://example.com/fake-news"
+    test_url = "https://www.newsinlevels.com/products/trump-talks-with-putin-level-1/"
     print(run_fake_news_checker(test_url))
