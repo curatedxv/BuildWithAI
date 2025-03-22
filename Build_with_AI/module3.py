@@ -1,12 +1,12 @@
 from typing import Tuple
-import google.generativeai as genai  # Correct import
+from google import genai
 
 # API key
-api_key = os.environ.get('YOUR_API_KEY')
-client = genai.Client(api_key=api_key)
+#api_key = os.environ.get('YOUR_API_KEY')
+client = genai.Client(api_key='AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
 
 # Configure Gemini
-genai.configure(api_key=api_key)
+#genai.configure(api_key=api_key)
 
 def analyze_article_integrity(
     original: Tuple[str, str],
