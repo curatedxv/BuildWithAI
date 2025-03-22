@@ -10,12 +10,12 @@ class URLRequest(BaseModel):
     url: str
 
 @app.post("/check_fake_news")
-def check_fake_news(request: URLRequest):
+def check_fake_news(request: URLRequest, api_key: str):
     try:
         url = request.url
 
         # Step 1: Get original article title & summary
-        object1 = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
+        object1 = module1(api_key)
         original_title, original_summary = object1.whole_module(url)
 
         # Step 2: Find similar articles and summarize them

@@ -2,8 +2,8 @@ from google import genai
 import re
 from module1 import module1 as module1
 
-def module2(topic):
-    client = genai.Client(api_key='AIzaSyBLICYY8h8XiPaDD0d-uqQ0fuaBSymgN30')
+def module2(topic, my_api_key):
+    client = genai.Client(api_key=my_api_key)
 
     prompt = f"""
     You are a knowledgeable AI assistant. The user is interested in the topic: "{topic}".
@@ -35,7 +35,7 @@ def module2(topic):
     print("Filtered links:", result)
 
     end = []
-    object1 = module1('AIzaSyBLICYY8h8XiPaDD0d-uqQ0fuaBSymgN30')
+    object1 = module1(api_key)
 
     for url in result:
         try:
@@ -47,6 +47,6 @@ def module2(topic):
 
     return end
 
-if __name__ == "__main__":
-    topic = "Machine Learning"
-    print(module2(topic))
+# if __name__ == "__main__":
+#     topic = "Machine Learning"
+#     print(module2(topic, api_key))
