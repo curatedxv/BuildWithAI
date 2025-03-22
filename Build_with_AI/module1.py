@@ -55,7 +55,7 @@ class module1:
             response = model.generate_content(prompt)
             return response.text
         except Exception as e:
-            raise Exception("Failed to summarize the text with Gemini, reason: " + stre(e))
+            raise Exception("Failed to summarize the text with Gemini, reason: " + str(e))
 
     def whole_module(self,url):
         # Fetch the text from the URL
@@ -73,16 +73,16 @@ class module1:
 
 if __name__ == "__main__":
     ## test 1
-    extractor = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
-    url = "https://www.bbc.com/news/articles/c33706jy774o"  # Example URL
-    title, summary = extractor.whole_module(url)
-    print(title)
-    print(summary)
-
-    ## test 2 -- wrong url
     # extractor = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
-    # url = "https://www.bbc.com/news/articles/c3dsadsdadadsadsa3706jy774o"  # Example URL
+    # url = "https://www.bbc.com/news/articles/c33706jy774o"  # Example URL
     # title, summary = extractor.whole_module(url)
     # print(title)
     # print(summary)
+
+    ## test 2 -- wrong url
+    extractor = module1("AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
+    url = "https://www.bbc.com/news/articles/c3dsadsdadadsadsa3706jy774o"  # Example URL
+    title, summary = extractor.whole_module(url)
+    print(title)
+    print(summary)
 
