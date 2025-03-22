@@ -8,7 +8,8 @@ load_dotenv()
 
 class module1:
     # Configure the Gemini API key
-    genai.configure(api_key="AIzaSyAI932dJEhFJeXa3fuChRUxLLEEMxGQBAI")
+    api_key = os.environ.get('YOUR_API_KEY')
+    client = genai.Client(api_key = api_key)
 
     def __init__(self):
         pass
@@ -61,28 +62,24 @@ class module1:
             print(f"Error generating summary: {e}")
             return None
 
+    def module1(self,url):
+        title, webpage_text = extractor.fetch_webpage_text(url)
 
-if __name__ == "__main__":
-    extractor = module1()
-    url = "https://www.bbc.com/news/articles/c33706jy774o"  # Example URL
+        if webpage_text:
+            # Summarize the text using Gemini
+            summary = extractor.summarize_text_with_gemini(webpage_text)
 
-    # Fetch the text from the URL
-    title, webpage_text = extractor.fetch_webpage_text(url)
+            if summary:
+                print("Summary:")
+                print(summary)
+            else:
+                print("Failed to generate a summary.")
+            if title:
+                print("Title:")
+                print(title)
+            else:
+                print("Failed to generate a title.")
 
-    if webpage_text:
-        # Summarize the text using Gemini
-        summary = extractor.summarize_text_with_gemini(webpage_text)
-
-        if summary:
-            print("Summary:")
-            print(summary)
         else:
-            print("Failed to generate a summary.")
-        if title:
-            print("Title:")
-            print(title)
-        else:
-            print("Failed to generate a title.")
-
-    else:
-        print("Failed to fetch webpage content.")
+            print("Failed to fetch webpage content.")
+        return title, summary
