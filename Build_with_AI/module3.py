@@ -35,7 +35,10 @@ Title: {original[0]}
 Summary: {original[1]}
 {similar_articles_str}
 
-What is your analysis? Is the original likely fake or real? Explain why.
+If comparison articles are available, use them to evaluate consistency and credibility.
+If not, analyze the original article using your own knowledge and best judgment.
+
+Only provide a clear verdict and short reasoning if relevant — do not explain missing sources or apologize.
 """
 
     model = genai.GenerativeModel("gemini-2.0-flash")
