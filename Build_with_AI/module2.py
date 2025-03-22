@@ -4,10 +4,10 @@ import os
 from module1 import module1 as module1
 
 #api_key = os.environ.get('YOUR_API_KEY')
-client = genai.Client(api_key = 'AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
+
 
 def module2(topic):
-
+    client = genai.Client(api_key='AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
     prompt = f"""
     You are a knowledgeable AI assistant. The user is interested in the topic: "{topic}".
     
@@ -46,7 +46,7 @@ def module2(topic):
     object1 = module1('AIzaSyAWKwn_82QHlXU4EGYs_2yYtARgS6NcQuw')
     for i in result:
         end = []
-        end.append(object1.summarize_text_with_gemini(i))
+        end.append(object1.whole_module(i))
     return end
 
 if __name__ == "__main__":
