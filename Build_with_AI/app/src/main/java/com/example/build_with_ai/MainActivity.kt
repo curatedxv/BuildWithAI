@@ -18,6 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.UnknownHostException
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +57,8 @@ class MainActivity : ComponentActivity() {
 fun FakeNewsDetectorApp() {
     var urlInput by remember { mutableStateOf("") }
     var verificationResult by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -58,41 +68,51 @@ fun FakeNewsDetectorApp() {
         // Header
         Header()
 
-        // Content area (empty for now, will contain results)
+        // Content area
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(16.dp)
         ) {
-            // This is where verification results would appear
-            verificationResult?.let { result ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .background(Color.White, RoundedCornerShape(8.dp))
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Analysis Result:",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = result)
-                }
-            } ?: run {
-                // Show placeholder when no result is available
-                Column(
+            if (isLoading) {
+                // Show loading indicator
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Enter a news URL or text to verify",
-                        color = Color.Gray
-                    )
+                    CircularProgressIndicator(color = Color(0xFF2196F3))
+                }
+            } else {
+                // Show verification results or placeholder
+                verificationResult?.let { result ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .background(Color.White, RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Analysis Result:",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = result)
+                    }
+                } ?: run {
+                    // Show placeholder when no result is available
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Enter a news URL or text to verify",
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }
@@ -102,18 +122,73 @@ fun FakeNewsDetectorApp() {
             value = urlInput,
             onValueChange = { urlInput = it },
             onSendClick = {
-            /* Handle verification logic here */
                 if (urlInput.isNotBlank()) {
-                    // Simple verification logic (you would replace this with actual verification)
-                    verificationResult = analyzeInput(urlInput)
-                    // Optionally clear the input field
-                    urlInput = ""
-                }}
+                    isLoading = true
+                    coroutineScope.launch {
+                        verificationResult = analyzeInput(urlInput)
+                        isLoading = false
+                        // Clear the input field
+                        urlInput = ""
+                    }
+                }
+            },
+            enabled = !isLoading
         )
     }
 }
-fun analyzeInput(input: String): String {
-    // This is just a placeholder. In a real app, you would call your verification API
+
+// Modified analyzeInput to use coroutines and call the API
+suspend fun analyzeInput(input: String): String {
+    return try {
+        // Call the API endpoint
+        withContext(Dispatchers.IO) {
+            val url = URL("http://10.0.2.2:5000/chat")
+            val connection = url.openConnection() as HttpURLConnection
+
+            try {
+                // Configure the connection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.doOutput = true
+
+                // Prepare the JSON payload
+                val jsonPayload = JSONObject().apply {
+                    put("message", input)
+                }.toString()
+
+                // Send the data
+                OutputStreamWriter(connection.outputStream).use { writer ->
+                    writer.write(jsonPayload)
+                    writer.flush()
+                }
+
+                // Read the response
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = connection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonResponse = JSONObject(response)
+
+                    // Extract the response field from JSON
+                    jsonResponse.getString("response")
+                } else {
+                    // If we got a bad response code, fall back to the existing logic
+                    fallbackAnalysis(input)
+                }
+            } finally {
+                connection.disconnect()
+            }
+        }
+    } catch (e: Exception) {
+        // If any network or parsing error occurs, fall back to the existing logic
+        when (e) {
+            is UnknownHostException -> "Unable to connect to the analysis server. Using offline analysis.\n\n${fallbackAnalysis(input)}"
+            else -> "Error: ${e.message}\n\nUsing offline analysis:\n${fallbackAnalysis(input)}"
+        }
+    }
+}
+
+// Original analysis logic as a fallback method
+private fun fallbackAnalysis(input: String): String {
     return if (input.contains("fake", ignoreCase = true)) {
         "This content appears to be POTENTIALLY FAKE. The text contains keywords that are often associated with misinformation."
     } else if (input.startsWith("http", ignoreCase = true)) {
@@ -184,7 +259,8 @@ fun Header() {
 fun InputArea(
     value: String,
     onValueChange: (String) -> Unit,
-    onSendClick: () -> Unit
+    onSendClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -203,19 +279,24 @@ fun InputArea(
                 focusedBorderColor = Color(0xFF2196F3),
                 unfocusedBorderColor = Color.LightGray,
                 focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
+                unfocusedContainerColor = Color.White,
+                disabledBorderColor = Color.LightGray,
+                disabledContainerColor = Color.White.copy(alpha = 0.8f)
             ),
             shape = RoundedCornerShape(28.dp),
-            maxLines = 1
+            maxLines = 1,
+            enabled = enabled
         )
 
         Button(
             onClick = onSendClick,
             modifier = Modifier.height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2196F3)
+                containerColor = Color(0xFF2196F3),
+                disabledContainerColor = Color.Gray
             ),
-            shape = RoundedCornerShape(28.dp)
+            shape = RoundedCornerShape(28.dp),
+            enabled = enabled
         ) {
             Text("Send")
         }
@@ -237,21 +318,15 @@ fun FakeNewsDetectorTheme(content: @Composable () -> Unit) {
     )
 }
 
-// Add this to your res/values/strings.xml
-// <string name="app_name">Fake News Detector</string>
-
-// For the Gradle setup, ensure you have:
-// 1. The latest Compose dependencies
-// 2. Kotlin version 1.7.0+
-// 3. Compose compiler version matching your Kotlin version
-
+// Add these dependencies to your build.gradle:
 /*
-Example build.gradle additions:
-
 dependencies {
     implementation "androidx.compose.ui:ui:1.3.0"
     implementation "androidx.compose.material3:material3:1.0.0"
     implementation "androidx.activity:activity-compose:1.6.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
+
+    // Coroutines for asynchronous operations
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 }
 */
