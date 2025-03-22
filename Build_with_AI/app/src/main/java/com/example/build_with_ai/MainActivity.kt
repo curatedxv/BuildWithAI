@@ -142,7 +142,7 @@ suspend fun analyzeInput(input: String): String {
     return try {
         // Call the API endpoint
         withContext(Dispatchers.IO) {
-            val url = URL("http://10.0.2.2:5000/chat")
+            val url = URL("http://10.0.2.2:8000/check_fake_news")
             val connection = url.openConnection() as HttpURLConnection
 
             try {
@@ -169,7 +169,7 @@ suspend fun analyzeInput(input: String): String {
                     val jsonResponse = JSONObject(response)
 
                     // Extract the response field from JSON
-                    jsonResponse.getString("response")
+                    jsonResponse.getString("verdict")
                 } else {
                     // If we got a bad response code, fall back to the existing logic
                     fallbackAnalysis(input)

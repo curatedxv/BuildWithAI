@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-
+from gemini import get_llm_response_gemini
 app = Flask(__name__)
 
 @app.route('/chat', methods=['POST'])
@@ -8,7 +8,8 @@ def chat():
  message = data.get('message', '')
  
  # Example response logic
- response_message = f"You said: {message}"
+ response_message = get_llm_response_gemini("This is an URL. Give me your best guess in detailed explanation if the content is fake or not:" + message)
+ 
 
  return jsonify({"response": response_message})
 
