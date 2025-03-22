@@ -3,7 +3,7 @@ import google.generativeai as genai  # Correct import
 
 # API key
 api_key = os.environ.get('YOUR_API_KEY')
-client = genai.Client(api_key = api_key)
+client = genai.Client(api_key=api_key)
 
 # Configure Gemini
 genai.configure(api_key=api_key)
